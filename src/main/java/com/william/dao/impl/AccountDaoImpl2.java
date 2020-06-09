@@ -1,0 +1,45 @@
+package com.william.dao.impl;
+
+import com.william.dao.IAccountDao;
+import com.william.domain.Account;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/**
+ * 账户持久层的实现类
+ */
+@Repository
+public class AccountDaoImpl2 implements IAccountDao {
+    @Autowired
+    private JdbcTemplate jt;
+
+    /*public void setJt(JdbcTemplate jt) {
+        this.jt = jt;
+    }*/
+
+    public Account findById(Integer id) {
+        List<Account> account = jt.query("select * from account where id = ?",new BeanPropertyRowMapper<Account>(Account.class),id);
+        return account.isEmpty()?null:account.get(0);
+    }
+
+    public Account findByName(String name) {
+        List<Account> accounts = jt.query("select * from account where name = ?",new BeanPropertyRowMapper<Account>(Account.class),name);
+        if(accounts.isEmpty()){
+            return null;
+        }else if(accounts.size()>1){
+            throw new RuntimeException("结果集不唯一");
+        }else{
+            return accounts.get(0);
+        }
+
+    }
+
+    public void updateAccount(Account account) {
+        jt.update("update account set name = ? ,money = ? where id = ?",account.getName(),account.getMoney(),account.getId());
+
+    }
+}
